@@ -58,11 +58,16 @@
     var css = [
       ':root{--qjt:' + BRAND + '}',
       'html.qjt-app{-webkit-tap-highlight-color:transparent}',
-      'html.qjt-app body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))!important}',
+      'html.qjt-app body{padding-bottom:calc(64px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      /* المنطقة الآمنة أعلى الشاشة: ندفع المحتوى للأسفل حتى لا يطبق عليه شريط الحالة */
+      'html.qjt-app body{padding-top:var(--qjt-sat, env(safe-area-inset-top, 0px))!important;background:#fff}',
+      /* وشريط أبيض ثابت يغطي ما ينزلق تحت شريط الحالة عند التمرير */
+      '#qjttop{position:fixed;top:0;inset-inline:0;z-index:99998;height:var(--qjt-sat, env(safe-area-inset-top, 0px));',
+      'background:#fff;pointer-events:none}',
       /* الشريط السفلي */
       '#qjtbar{position:fixed;inset-inline:0;bottom:0;z-index:99990;display:flex;',
       'background:rgba(16,20,24,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);',
-      'border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom,0px);',
+      'border-top:1px solid rgba(255,255,255,.08);padding-bottom:var(--qjt-sab, env(safe-area-inset-bottom, 0px));',
       'box-shadow:0 -6px 24px rgba(0,0,0,.28);direction:rtl;font-family:inherit}',
       '#qjtbar button{flex:1;background:none;border:0;padding:8px 2px 7px;display:flex;flex-direction:column;',
       'align-items:center;gap:3px;color:#9aa3ad;font:600 10.5px/1.2 inherit;cursor:pointer;position:relative;transition:color .18s}',
@@ -78,7 +83,7 @@
       '#qjtsheet .sc{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .25s}',
       '#qjtsheet.in .sc{opacity:1}',
       '#qjtsheet .sp{position:absolute;inset-inline:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;',
-      'padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}',
+      'padding:10px 16px calc(20px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}',
       '#qjtsheet.in .sp{transform:translateY(0)}',
       '#qjtsheet .gr{width:40px;height:4px;border-radius:2px;background:#d8dde3;margin:0 auto 12px}',
       '#qjtsheet h3{margin:0 0 12px;font:700 17px/1.3 inherit;color:#101418}',
@@ -104,7 +109,7 @@
       '#qjtpull.spin i{animation:qjtsp .7s linear infinite}',
       '@keyframes qjtsp{to{transform:rotate(360deg)}}',
       /* زر المشاركة */
-      '#qjtshare{position:fixed;inset-inline-start:14px;bottom:calc(76px + env(safe-area-inset-bottom,0px));',
+      '#qjtshare{position:fixed;inset-inline-start:14px;bottom:calc(76px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));',
       'z-index:99989;width:46px;height:46px;border-radius:50%;border:0;display:none;align-items:center;',
       'justify-content:center;background:#fff;color:#101418;box-shadow:0 4px 16px rgba(0,0,0,.2)}',
       '#qjtshare.on{display:flex}',
@@ -114,9 +119,14 @@
       /* أداة واتساب الخارجية تجلس بأعلى z-index ممكن وتغطي الشريط — نرفعها فوقه */
       'html.qjt-app #gb-waw-iframe,html.qjt-app iframe[id*="waw"],html.qjt-app .whatsapp-btn,',
       'html.qjt-app .whatsapp_float,html.qjt-app [class*="whats"][class*="float"]',
-      '{bottom:calc(72px + env(safe-area-inset-bottom,0px))!important}',
+      '{bottom:calc(72px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      /* زر «العودة للأعلى» في الموقع يجلس فوق الشريط ويغطي تبويب الرئيسية */
+      'html.qjt-app #scrollUp,html.qjt-app [id*="scrollUp"],html.qjt-app [class*="scroll-top"],',
+      'html.qjt-app [class*="scrollToTop"],html.qjt-app [class*="back-to-top"]',
+      '{bottom:calc(150px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
       /* تختفي الأداة عند فتح ورقة الأقسام لأن z-index عندها أعلى من أي قيمة */
       'html.qjt-sheet #gb-waw-iframe,html.qjt-sheet iframe[id*="waw"],html.qjt-sheet .whatsapp-btn,',
+      'html.qjt-sheet #scrollUp,html.qjt-sheet [id*="scrollUp"],',
       'html.qjt-sheet .whatsapp_float,html.qjt-sheet [class*="whats"][class*="float"]',
       '{opacity:0!important;pointer-events:none!important;transition:opacity .2s}'
     ].join('');
@@ -347,10 +357,33 @@
     try { SB.setStyle({ style: 'LIGHT' }); SB.setBackgroundColor({ color: '#ffffff' }); } catch (e) { /* تجاهل */ }
   }
 
+  /* المنطقة الآمنة: قيم env(safe-area-inset-*) تساوي صفراً ما لم يحتوِ
+     وسم viewport على viewport-fit=cover — وموقع qjt.sa لا يحتويه،
+     فنضيفه هنا وإلا اختفى شريط الحالة فوق رأس الموقع. */
+  function viewportFit() {
+    var m = document.querySelector('meta[name="viewport"]');
+    if (!m) {
+      m = document.createElement('meta');
+      m.name = 'viewport';
+      m.content = 'width=device-width, initial-scale=1';
+      document.head.appendChild(m);
+    }
+    if (!/viewport-fit/.test(m.content)) m.content = m.content + ', viewport-fit=cover';
+  }
+
+  function safeTop() {
+    if (document.getElementById('qjttop')) return;
+    var s = document.createElement('div');
+    s.id = 'qjttop';
+    document.body.appendChild(s);
+  }
+
   /* ---------- الإقلاع ---------- */
   function boot() {
     document.documentElement.classList.add('qjt-app');
+    viewportFit();
     styles();
+    safeTop();
     bar(); fixImages(); offline(); pull(); share(); links();
     statusBar(); backButton(); cartReminder();
     var SS = plug('SplashScreen');
@@ -375,19 +408,17 @@
     setInterval(sync, 4000);
   }
 
+  /* هل نحن داخل التطبيق؟ نعتمد على وسم المتصفح أولاً لأنه يوجد دائماً،
+     ولا ننتظر جسر Capacitor — فالإضافات وحدها هي التي تحتاجه. */
+  function inApp() {
+    return /QJTApp/.test(navigator.userAgent) || native();
+  }
+
   function start() {
-    if (!native()) return;                       // في المتصفح العادي لا نغيّر شيئاً
+    if (!inApp()) return;                        // في المتصفح العادي لا نغيّر شيئاً
     if (document.body) boot();
     else document.addEventListener('DOMContentLoaded', boot, { once: true });
   }
 
-  // الجسر قد يتأخر لحظة عن السكربت المحقون
-  if (native()) start();
-  else {
-    var tries = 0;
-    var t = setInterval(function () {
-      if (native()) { clearInterval(t); start(); }
-      else if (++tries > 40) clearInterval(t);
-    }, 100);
-  }
+  start();
 })();

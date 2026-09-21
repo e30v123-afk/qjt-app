@@ -17,11 +17,13 @@
     "contentInset": "never",
     "scrollEnabled": true,
     "backgroundColor": "#ffffff",
-    "limitsNavigationsToAppBoundDomains": false
+    "limitsNavigationsToAppBoundDomains": false,
+    "appendUserAgentString": "QJTApp"
   },
   "android": {
     "backgroundColor": "#ffffff",
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "appendUserAgentString": "QJTApp"
   },
   "plugins": {
     "SplashScreen": {
@@ -40,5 +42,6 @@
       "smallIcon": "ic_stat_qjt",
       "iconColor": "#E8912A"
     }
-  }
+  },
+  "appendUserAgentString": "QJTApp"
 }
