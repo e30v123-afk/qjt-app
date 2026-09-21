@@ -1,0 +1,111 @@
+# بناء تطبيق «قافلة الجزيرة» (تحديث للتطبيق المنشور com.app.qjtcar1) ورفعه إلى App Store
+workflows:
+  ios-appstore:
+    name: قافلة الجزيرة — iOS App Store
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: MishkatAppStoreKey      # نفس مفتاح الحساب
+    environment:
+      groups: [qjtstore]                         # فيها APP_STORE_APP_ID و CERTIFICATE_PRIVATE_KEY
+      vars:
+        BUNDLE_ID: "com.app.qjtcar1"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+        MARKETING_VERSION: "2.0"
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: تثبيت الحزم
+        script: npm ci || npm install
+
+      - name: تجهيز منصة iOS
+        script: |
+          [ -d ios ] || npx cap add ios
+          npx cap sync ios
+          npx @capacitor/assets@3 generate --ios \
+            --iconBackgroundColor '#101418' \
+            --splashBackgroundColor '#101418' \
+            --splashBackgroundColorDark '#101418'
+
+      - name: حقن قشرة التطبيق
+        script: |
+          set -e
+          APPDIR=ios/App/App
+          cp www/shell.js "$APPDIR/shell.js"
+          cp ios-shell/QJTViewController.swift "$APPDIR/QJTViewController.swift"
+
+          # اجعل الشاشة الرئيسية تستخدم الصنف الذي يحقن القشرة
+          SB="$APPDIR/Base.lproj/Main.storyboard"
+          /usr/bin/sed -i '' \
+            's|customClass="CAPBridgeViewController" customModule="Capacitor"|customClass="QJTViewController" customModule="App"|' \
+            "$SB"
+          grep -q 'customClass="QJTViewController"' "$SB" || { echo "فشل تعديل Main.storyboard"; exit 1; }
+
+          PLIST="$APPDIR/Info.plist"
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :CFBundleDisplayName" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'قافلة الجزيرة'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations~ipad" "$PLIST" 2>/dev/null || true
+
+          # أضف الملفين إلى هدف البناء واحصر التطبيق في الآيفون
+          gem list -i xcodeproj >/dev/null 2>&1 || sudo gem install xcodeproj --no-document
+          ruby -e '
+            require "xcodeproj"
+            project = Xcodeproj::Project.open("ios/App/App.xcodeproj")
+            target  = project.targets.find { |t| t.name == "App" }
+            group   = project.main_group.find_subpath("App", true)
+
+            (project.build_configurations + target.build_configurations).each do |c|
+              c.build_settings["TARGETED_DEVICE_FAMILY"] = "1"
+            end
+
+            unless target.source_build_phase.files.any? { |f| f.display_name == "QJTViewController.swift" }
+              target.source_build_phase.add_file_reference(group.new_reference("QJTViewController.swift"), true)
+              puts "أُضيف للمصادر: QJTViewController.swift"
+            end
+            unless target.resources_build_phase.files.any? { |f| f.display_name == "shell.js" }
+              target.resources_build_phase.add_file_reference(group.new_reference("shell.js"), true)
+              puts "أُضيف للموارد: shell.js"
+            end
+            project.save
+            puts "TARGETED_DEVICE_FAMILY = #{target.build_configurations.first.build_settings["TARGETED_DEVICE_FAMILY"]}"
+          '
+          echo "— تأكيد —"
+          ls -la "$APPDIR/shell.js" "$APPDIR/QJTViewController.swift"
+
+      - name: إعداد التوقيع
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: أرقام الإصدار
+        script: |
+          LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID" --platform IOS 2>/dev/null | tail -1 | tr -cd '0-9')
+          [ -z "$LATEST" ] && LATEST=0
+          NEXT=$((LATEST + 1))
+          if [ "${BUILD_NUMBER:-0}" -gt "$NEXT" ]; then NEXT=$BUILD_NUMBER; fi
+          echo "آخر نسخة مرفوعة: $LATEST — رقم هذا البناء: $NEXT — الإصدار: $MARKETING_VERSION"
+          cd ios/App
+          agvtool new-version -all "$NEXT"
+          agvtool new-marketing-version "$MARKETING_VERSION"
+
+      - name: بناء التطبيق
+        script: xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
