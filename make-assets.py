@@ -30,13 +30,14 @@ def cut_white(im, thr=243):
 art = cut_white(logo)
 print('الشعار بعد القصّ:', art.size)
 
-# ---------- الأيقونة 1024 ----------
+# ---------- الأيقونة 1024 (خلفية بيضاء) ----------
 S = 1024
-icon = Image.new('RGB', (S, S), (16, 20, 24))
+icon = Image.new('RGB', (S, S), (255, 255, 255))
 d = ImageDraw.Draw(icon)
-for y in range(S):                       # تدرّج داكن أنيق يبرز الذهبي
+for y in range(S):                       # تدرّج أبيض خفيف جداً يعطي عمقاً بلا تلوين
     t = y / S
-    d.line([(0, y), (S, y)], fill=(int(22 - 8 * t), int(27 - 10 * t), int(33 - 12 * t)))
+    v = int(255 - 7 * t)
+    d.line([(0, y), (S, y)], fill=(v, v, v))
 
 fit = int(S * 0.76)
 w, h = art.size
@@ -48,13 +49,13 @@ print('الأيقونة  :', os.path.join(OUT, 'icon.png'), icon.size)
 
 # ---------- شاشة الإقلاع 2732 ----------
 P = 2732
-sp = Image.new('RGB', (P, P), (16, 20, 24))
+sp = Image.new('RGB', (P, P), (255, 255, 255))
 d = ImageDraw.Draw(sp)
 cx = cy = P // 2
-for r in range(P // 2, 0, -6):           # توهّج خفيف خلف الشعار
+for r in range(P // 2, 0, -6):           # هالة بيضاء ناعمة خلف الشعار
     t = r / (P / 2)
-    c = (int(16 + 16 * (1 - t)), int(20 + 16 * (1 - t)), int(24 + 14 * (1 - t)))
-    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=c)
+    v = int(248 + 7 * (1 - t))
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(v, v, v))
 
 fit = int(P * 0.30)
 sc = min(fit / w, fit / h)

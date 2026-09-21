@@ -2,36 +2,39 @@
   "appId": "com.app.qjtcar1",
   "appName": "قافلة الجزيرة",
   "webDir": "www",
-  "backgroundColor": "#101418",
+  "backgroundColor": "#ffffff",
   "server": {
     "url": "https://qjt.sa",
     "hostname": "qjt.sa",
     "androidScheme": "https",
     "cleartext": false,
-    "allowNavigation": ["qjt.sa", "*.qjt.sa"]
+    "allowNavigation": [
+      "qjt.sa",
+      "*.qjt.sa"
+    ]
   },
   "ios": {
     "contentInset": "never",
     "scrollEnabled": true,
-    "backgroundColor": "#101418",
+    "backgroundColor": "#ffffff",
     "limitsNavigationsToAppBoundDomains": false
   },
   "android": {
-    "backgroundColor": "#101418",
+    "backgroundColor": "#ffffff",
     "allowMixedContent": false
   },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1200,
       "launchAutoHide": true,
-      "backgroundColor": "#101418",
+      "backgroundColor": "#ffffff",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "overlaysWebView": false,
-      "style": "DARK",
-      "backgroundColor": "#101418"
+      "style": "LIGHT",
+      "backgroundColor": "#ffffff"
     },
     "LocalNotifications": {
       "smallIcon": "ic_stat_qjt",

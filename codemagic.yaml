@@ -25,9 +25,9 @@ workflows:
           [ -d ios ] || npx cap add ios
           npx cap sync ios
           npx @capacitor/assets@3 generate --ios \
-            --iconBackgroundColor '#101418' \
-            --splashBackgroundColor '#101418' \
-            --splashBackgroundColorDark '#101418'
+            --iconBackgroundColor '#ffffff' \
+            --splashBackgroundColor '#ffffff' \
+            --splashBackgroundColorDark '#ffffff'
 
       - name: حقن قشرة التطبيق
         script: |
