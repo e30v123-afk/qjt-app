@@ -21,7 +21,7 @@
     { id: 'cats', t: 'الأقسام', sheet: true, m: /^\/(product|service|pacakge)/ },
     { id: 'cart', t: 'السلة', u: '/cart/content', m: /^\/cart/, badge: true },
     { id: 'fav', t: 'المفضلة', u: '/user/wishlist', m: /^\/user\/wishlist/ },
-    { id: 'me', t: 'حسابي', u: '/user/sign-in', m: /^\/user(?!\/wishlist)/ }
+    { id: 'me', t: 'حسابي', account: true, m: /^\/user(?!\/wishlist)/ }
   ];
   var ICONS = {
     home: '<path d="M3 10.6 12 3l9 7.6"/><path d="M5.5 9.4V20h13V9.4"/><path d="M9.8 20v-5.4h4.4V20"/>',
@@ -59,7 +59,7 @@
       ':root{--qjt:' + BRAND + '}',
       'html.qjt-app{-webkit-tap-highlight-color:transparent}',
       /* الشريط السفلي عائم، فنترك له مساحة أكبر */
-      'html.qjt-app body{padding-bottom:calc(86px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      'html.qjt-app body{padding-bottom:calc(76px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
       /* المنطقة الآمنة + ارتفاع الرأس الثابت (يُقاس ويُوضع في --qjt-hdr) */
       'html.qjt-app body{padding-top:calc(var(--qjt-sat, env(safe-area-inset-top, 0px)) + var(--qjt-hdr, 80px))!important;background:#fff}',
       /* رأس الموقع يبقى ثابتاً أعلى الشاشة ولا يذهب مع التمرير */
@@ -70,21 +70,21 @@
       '#qjttop{position:fixed;top:0;inset-inline:0;z-index:99998;height:var(--qjt-sat, env(safe-area-inset-top, 0px));',
       'background:#fff;pointer-events:none}',
       /* الشريط السفلي: عائم بحواف مقوّسة */
-      '#qjtbar{position:fixed;inset-inline:12px;bottom:calc(10px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));z-index:99990;',
-      'display:flex;border-radius:26px;padding:6px 6px 7px;',
+      '#qjtbar{position:fixed;inset-inline:14px;bottom:calc(9px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));z-index:99990;',
+      'display:flex;border-radius:22px;padding:5px 5px 6px;',
       'background:rgba(20,25,31,.62);backdrop-filter:blur(26px) saturate(180%);',
       '-webkit-backdrop-filter:blur(26px) saturate(180%);',
       'border:1px solid rgba(255,255,255,.14);',
       'box-shadow:0 8px 26px rgba(0,0,0,.24),0 1px 3px rgba(0,0,0,.14);',
       'direction:rtl;font-family:inherit}',
-      '#qjtbar button{flex:1;background:none;border:0;padding:7px 2px 6px;display:flex;flex-direction:column;',
-      'align-items:center;gap:3px;color:#c3ccd4;font:600 10.5px/1.2 inherit;cursor:pointer;',
-      'position:relative;border-radius:19px;transition:color .18s,background .18s}',
-      '#qjtbar button svg{width:23px;height:23px;transition:transform .18s}',
+      '#qjtbar button{flex:1;background:none;border:0;padding:6px 2px 5px;display:flex;flex-direction:column;',
+      'align-items:center;gap:2px;color:#c9d2d9;font-family:inherit;font-weight:600;font-size:9.5px;line-height:1.15;cursor:pointer;',
+      'letter-spacing:-.1px;position:relative;border-radius:16px;transition:color .18s,background .18s}',
+      '#qjtbar button svg{width:19px;height:19px;stroke-width:1.6;transition:transform .18s}',
       '#qjtbar button:active svg{transform:scale(.86)}',
       '#qjtbar button.on{color:var(--qjt);background:rgba(232,145,42,.20)}',
-      '#qjtbar .bdg{position:absolute;top:4px;inset-inline-end:calc(50% - 20px);min-width:17px;height:17px;',
-      'border-radius:9px;background:var(--qjt);color:#10140f;font:700 10px/17px system-ui;text-align:center;padding:0 4px}',
+      '#qjtbar .bdg{position:absolute;top:2px;inset-inline-end:calc(50% - 17px);min-width:15px;height:15px;',
+      'border-radius:8px;background:var(--qjt);color:#10140f;font:700 9px/15px system-ui;text-align:center;padding:0 3px}',
       /* ورقة الأقسام */
       '#qjtsheet{position:fixed;inset:0;z-index:99995;display:none;direction:rtl}',
       '#qjtsheet.open{display:block}',
@@ -94,9 +94,9 @@
       'padding:10px 16px calc(24px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}',
       '#qjtsheet.in .sp{transform:translateY(0)}',
       '#qjtsheet .gr{width:40px;height:4px;border-radius:2px;background:#d8dde3;margin:0 auto 12px}',
-      '#qjtsheet h3{margin:0 0 12px;font:700 17px/1.3 inherit;color:#101418}',
+      '#qjtsheet h3{margin:0 0 12px;font-family:inherit;font-weight:700;font-size:17px;line-height:1.3;color:#101418}',
       '#qjtsheet a{display:flex;align-items:center;gap:12px;padding:13px 10px;border-radius:14px;',
-      'text-decoration:none;color:#101418;font:600 15px/1.3 inherit}',
+      'text-decoration:none;color:#101418;font-family:inherit;font-weight:600;font-size:15px;line-height:1.3}',
       '#qjtsheet a:active{background:#f3f5f7}',
       '#qjtsheet a svg{width:22px;height:22px;color:var(--qjt);flex:none}',
       '#qjtsheet a i{margin-inline-start:auto;color:#b7bfc7;font-style:normal}',
@@ -105,10 +105,10 @@
       'justify-content:center;gap:14px;background:#101418;color:#eef2f6;text-align:center;padding:30px;direction:rtl}',
       '#qjtoff.on{display:flex}',
       '#qjtoff svg{width:62px;height:62px;color:var(--qjt)}',
-      '#qjtoff h2{margin:0;font:700 20px/1.4 inherit}',
-      '#qjtoff p{margin:0;color:#98a2ad;font:400 14.5px/1.7 inherit;max-width:300px}',
+      '#qjtoff h2{margin:0;font-family:inherit;font-weight:700;font-size:20px;line-height:1.4}',
+      '#qjtoff p{margin:0;color:#98a2ad;font-family:inherit;font-weight:400;font-size:14.5px;line-height:1.7;max-width:300px}',
       '#qjtoff button{margin-top:6px;background:var(--qjt);color:#10140f;border:0;border-radius:12px;',
-      'padding:12px 30px;font:700 15px inherit}',
+      'padding:12px 30px;font-family:inherit;font-weight:700;font-size:15px}',
       /* السحب للتحديث */
       '#qjtpull{position:fixed;top:0;inset-inline:0;z-index:99991;display:flex;justify-content:center;',
       'pointer-events:none;transition:opacity .2s}',
@@ -127,11 +127,17 @@
       /* أداة واتساب الخارجية تجلس بأعلى z-index ممكن وتغطي الشريط — نرفعها فوقه */
       'html.qjt-app #gb-waw-iframe,html.qjt-app iframe[id*="waw"],html.qjt-app .whatsapp-btn,',
       'html.qjt-app .whatsapp_float,html.qjt-app [class*="whats"][class*="float"]',
-      '{bottom:calc(92px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      '{bottom:calc(82px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
       /* زر «العودة للأعلى» في الموقع يجلس فوق الشريط ويغطي تبويب الرئيسية */
       'html.qjt-app #scrollUp,html.qjt-app [id*="scrollUp"],html.qjt-app [class*="scroll-top"],',
       'html.qjt-app [class*="scrollToTop"],html.qjt-app [class*="back-to-top"]',
-      '{bottom:calc(168px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      '{bottom:calc(156px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      /* عند فتح أي نافذة للموقع (الدخول، كود التحقق، السلة، القائمة) يختفي
+         الشريط والأزرار العائمة — كانت تغطي حقل الجوال وكود التحقق */
+      'html.qjt-modal #qjtbar,html.qjt-modal #qjtshare,html.qjt-modal #gb-waw-iframe,',
+      'html.qjt-modal iframe[id*="waw"],html.qjt-modal #scrollUp',
+      '{opacity:0!important;pointer-events:none!important;transform:translateY(12px);',
+      'transition:opacity .2s,transform .2s}',
       /* تختفي الأداة عند فتح ورقة الأقسام لأن z-index عندها أعلى من أي قيمة */
       'html.qjt-sheet #gb-waw-iframe,html.qjt-sheet iframe[id*="waw"],html.qjt-sheet .whatsapp-btn,',
       'html.qjt-sheet #scrollUp,html.qjt-sheet [id*="scrollUp"],',
@@ -169,7 +175,9 @@
       var b = e.target.closest('button'); if (!b) return;
       var t = TABS.filter(function (x) { return x.id === b.dataset.id; })[0];
       tap('LIGHT');
-      if (t.sheet) sheet(true); else go(t.u);
+      if (t.sheet) sheet(true);
+      else if (t.account) openAccount();
+      else go(t.u);
     });
     active(); badge();
   }
@@ -185,6 +193,18 @@
     var n = cartCount();
     b.hidden = !n;
     b.textContent = n > 99 ? '99+' : n;
+  }
+
+  /* «حسابي»: نضغط زر الحساب في الموقع نفسه — فهو يعرف إن كان العميل داخلاً
+     (يفتح حسابه) أو لا (يفتح نافذة الدخول). الرابط /user/sign-in صفحة 404. */
+  function openAccount() {
+    var btn = document.querySelector('.otploginMobileBtn, .account-header-btn, .otploginEmailBtn');
+    if (btn) { btn.click(); return; }
+    var modal = document.getElementById('loginModal');
+    if (modal && window.bootstrap && window.bootstrap.Modal) {
+      try { window.bootstrap.Modal.getOrCreateInstance(modal).show(); return; } catch (e) { /* تابع */ }
+    }
+    go('/user/profile');          // آخر احتياط: صفحة موجودة فعلاً
   }
 
   /* ---------- ورقة الأقسام ---------- */
@@ -414,7 +434,7 @@
     styles();
     safeTop();
     bar(); fixImages(); offline(); pull(); share(); links();
-    statusBar(); backButton(); cartReminder();
+    statusBar(); backButton(); cartReminder(); watchModals();
     var SS = plug('SplashScreen');
     if (SS) setTimeout(function () { SS.hide().catch(function () { /* تجاهل */ }); }, 350);
     watchCart();
@@ -435,6 +455,23 @@
       }).observe(a, { childList: true, subtree: true, characterData: true });
     }
     setInterval(sync, 4000);
+  }
+
+  /* نراقب نوافذ الموقع (Bootstrap) لنُخفي الشريط أثناء فتحها */
+  function watchModals() {
+    var apply = function () {
+      var open = !!document.querySelector('.modal.show, .offcanvas.show')
+        || /modal-open|offcanvas-backdrop/.test(document.body.className);
+      document.documentElement.classList.toggle('qjt-modal', open);
+    };
+    apply();
+    if (window.MutationObserver) {
+      var t = 0;
+      new MutationObserver(function () {
+        clearTimeout(t); t = setTimeout(apply, 60);
+      }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    }
+    setInterval(apply, 1200);
   }
 
   /* هل نحن داخل التطبيق؟ نعتمد على وسم المتصفح أولاً لأنه يوجد دائماً،
