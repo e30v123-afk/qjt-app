@@ -58,23 +58,31 @@
     var css = [
       ':root{--qjt:' + BRAND + '}',
       'html.qjt-app{-webkit-tap-highlight-color:transparent}',
-      'html.qjt-app body{padding-bottom:calc(64px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
-      /* المنطقة الآمنة أعلى الشاشة: ندفع المحتوى للأسفل حتى لا يطبق عليه شريط الحالة */
-      'html.qjt-app body{padding-top:var(--qjt-sat, env(safe-area-inset-top, 0px))!important;background:#fff}',
+      /* الشريط السفلي عائم، فنترك له مساحة أكبر */
+      'html.qjt-app body{padding-bottom:calc(86px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      /* المنطقة الآمنة + ارتفاع الرأس الثابت (يُقاس ويُوضع في --qjt-hdr) */
+      'html.qjt-app body{padding-top:calc(var(--qjt-sat, env(safe-area-inset-top, 0px)) + var(--qjt-hdr, 80px))!important;background:#fff}',
+      /* رأس الموقع يبقى ثابتاً أعلى الشاشة ولا يذهب مع التمرير */
+      'html.qjt-app header{position:fixed!important;top:var(--qjt-sat, env(safe-area-inset-top, 0px))!important;',
+      'inset-inline:0!important;z-index:99992!important;background:#fff!important;',
+      'box-shadow:0 2px 14px rgba(16,20,24,.10)!important}',
       /* وشريط أبيض ثابت يغطي ما ينزلق تحت شريط الحالة عند التمرير */
       '#qjttop{position:fixed;top:0;inset-inline:0;z-index:99998;height:var(--qjt-sat, env(safe-area-inset-top, 0px));',
       'background:#fff;pointer-events:none}',
-      /* الشريط السفلي */
-      '#qjtbar{position:fixed;inset-inline:0;bottom:0;z-index:99990;display:flex;',
-      'background:rgba(16,20,24,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);',
-      'border-top:1px solid rgba(255,255,255,.08);padding-bottom:var(--qjt-sab, env(safe-area-inset-bottom, 0px));',
-      'box-shadow:0 -6px 24px rgba(0,0,0,.28);direction:rtl;font-family:inherit}',
-      '#qjtbar button{flex:1;background:none;border:0;padding:8px 2px 7px;display:flex;flex-direction:column;',
-      'align-items:center;gap:3px;color:#9aa3ad;font:600 10.5px/1.2 inherit;cursor:pointer;position:relative;transition:color .18s}',
+      /* الشريط السفلي: عائم بحواف مقوّسة */
+      '#qjtbar{position:fixed;inset-inline:12px;bottom:calc(10px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));z-index:99990;',
+      'display:flex;border-radius:26px;padding:6px 6px 7px;',
+      'background:rgba(20,25,31,.62);backdrop-filter:blur(26px) saturate(180%);',
+      '-webkit-backdrop-filter:blur(26px) saturate(180%);',
+      'border:1px solid rgba(255,255,255,.14);',
+      'box-shadow:0 8px 26px rgba(0,0,0,.24),0 1px 3px rgba(0,0,0,.14);',
+      'direction:rtl;font-family:inherit}',
+      '#qjtbar button{flex:1;background:none;border:0;padding:7px 2px 6px;display:flex;flex-direction:column;',
+      'align-items:center;gap:3px;color:#c3ccd4;font:600 10.5px/1.2 inherit;cursor:pointer;',
+      'position:relative;border-radius:19px;transition:color .18s,background .18s}',
       '#qjtbar button svg{width:23px;height:23px;transition:transform .18s}',
       '#qjtbar button:active svg{transform:scale(.86)}',
-      '#qjtbar button.on{color:var(--qjt)}',
-      '#qjtbar button.on::before{content:"";position:absolute;top:0;width:26px;height:3px;border-radius:0 0 4px 4px;background:var(--qjt)}',
+      '#qjtbar button.on{color:var(--qjt);background:rgba(232,145,42,.20)}',
       '#qjtbar .bdg{position:absolute;top:4px;inset-inline-end:calc(50% - 20px);min-width:17px;height:17px;',
       'border-radius:9px;background:var(--qjt);color:#10140f;font:700 10px/17px system-ui;text-align:center;padding:0 4px}',
       /* ورقة الأقسام */
@@ -83,7 +91,7 @@
       '#qjtsheet .sc{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .25s}',
       '#qjtsheet.in .sc{opacity:1}',
       '#qjtsheet .sp{position:absolute;inset-inline:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;',
-      'padding:10px 16px calc(20px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}',
+      'padding:10px 16px calc(24px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}',
       '#qjtsheet.in .sp{transform:translateY(0)}',
       '#qjtsheet .gr{width:40px;height:4px;border-radius:2px;background:#d8dde3;margin:0 auto 12px}',
       '#qjtsheet h3{margin:0 0 12px;font:700 17px/1.3 inherit;color:#101418}',
@@ -119,11 +127,11 @@
       /* أداة واتساب الخارجية تجلس بأعلى z-index ممكن وتغطي الشريط — نرفعها فوقه */
       'html.qjt-app #gb-waw-iframe,html.qjt-app iframe[id*="waw"],html.qjt-app .whatsapp-btn,',
       'html.qjt-app .whatsapp_float,html.qjt-app [class*="whats"][class*="float"]',
-      '{bottom:calc(72px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      '{bottom:calc(92px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
       /* زر «العودة للأعلى» في الموقع يجلس فوق الشريط ويغطي تبويب الرئيسية */
       'html.qjt-app #scrollUp,html.qjt-app [id*="scrollUp"],html.qjt-app [class*="scroll-top"],',
       'html.qjt-app [class*="scrollToTop"],html.qjt-app [class*="back-to-top"]',
-      '{bottom:calc(150px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
+      '{bottom:calc(168px + var(--qjt-sab, env(safe-area-inset-bottom, 0px)))!important}',
       /* تختفي الأداة عند فتح ورقة الأقسام لأن z-index عندها أعلى من أي قيمة */
       'html.qjt-sheet #gb-waw-iframe,html.qjt-sheet iframe[id*="waw"],html.qjt-sheet .whatsapp-btn,',
       'html.qjt-sheet #scrollUp,html.qjt-sheet [id*="scrollUp"],',
@@ -378,10 +386,31 @@
     document.body.appendChild(s);
   }
 
+  /* الرأس صار ثابتاً فخرج من سياق الصفحة — نقيس ارتفاعه ونحفظه في --qjt-hdr
+     ليعرف حشو body كم يُبعد المحتوى، وإلا اختفى أول المحتوى تحت الرأس. */
+  function headerHeight() {
+    var h = document.querySelector('header');
+    if (!h) return;
+    var measure = function () {
+      // نقيسه وهو في مكانه الطبيعي قبل أن تُطبَّق قاعدة التثبيت
+      var px = Math.round(h.getBoundingClientRect().height);
+      if (px > 20 && px < 220) {
+        document.documentElement.style.setProperty('--qjt-hdr', px + 'px');
+      }
+    };
+    measure();
+    // الارتفاع قد يتغيّر بعد تحميل الصور أو بتدوير الجهاز
+    setTimeout(measure, 1200);
+    setTimeout(measure, 4000);
+    addEventListener('orientationchange', function () { setTimeout(measure, 350); });
+    addEventListener('resize', function () { clearTimeout(headerHeight._t); headerHeight._t = setTimeout(measure, 250); });
+  }
+
   /* ---------- الإقلاع ---------- */
   function boot() {
     document.documentElement.classList.add('qjt-app');
     viewportFit();
+    headerHeight();          // يُقاس قبل التثبيت ليكون الارتفاع الطبيعي
     styles();
     safeTop();
     bar(); fixImages(); offline(); pull(); share(); links();
