@@ -88,8 +88,14 @@ workflows:
 
       - name: أرقام الإصدار
         script: |
-          LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID" --platform IOS 2>/dev/null | tail -1 | tr -cd '0-9')
-          [ -z "$LATEST" ] && LATEST=0
+          # أعلى رقم مرفوع فعلاً = الأكبر بين إصدارات المتجر وTestFlight
+          A=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APP_ID" --platform IOS 2>/dev/null | tail -1 | tr -cd '0-9')
+          T=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" --platform IOS 2>/dev/null | tail -1 | tr -cd '0-9')
+          [ -z "$A" ] && A=0
+          [ -z "$T" ] && T=0
+          LATEST=$A
+          [ "$T" -gt "$LATEST" ] && LATEST=$T
+          echo "المتجر: $A | TestFlight: $T"
           NEXT=$((LATEST + 1))
           if [ "${BUILD_NUMBER:-0}" -gt "$NEXT" ]; then NEXT=$BUILD_NUMBER; fi
           echo "آخر نسخة مرفوعة: $LATEST — رقم هذا البناء: $NEXT — الإصدار: $MARKETING_VERSION"
