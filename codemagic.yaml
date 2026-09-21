@@ -12,7 +12,7 @@ workflows:
         BUNDLE_ID: "com.app.qjtcar1"
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
-        MARKETING_VERSION: "2.0"
+        MARKETING_VERSION: "2.1"   # 2.0 منشور على المتجر فآبل تقفله ضد أي رفع جديد
       node: 20
       xcode: latest
       cocoapods: default
